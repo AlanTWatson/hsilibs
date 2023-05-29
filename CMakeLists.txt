@@ -24,6 +24,24 @@ find_package(daqdataformats REQUIRED)
 find_package(detdataformats REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework iostreams REQUIRED)
 
+##############################################################################
+# OKS stuff
+find_package(okssystem REQUIRED)
+find_package(genconfig REQUIRED)
+find_package(oksdbinterfaces REQUIRED)
+find_package(dunedaqdal REQUIRED)
+
+daq_generate_dal(hsilibs.schema.xml
+  NAMESPACE dunedaq::dal
+  INCLUDE ${CMAKE_CODEGEN_BINARY_DIR}/include/${PROJECT_NAME}
+  INCLUDE_DIRECTORIES ${dunedaqdal_DIR}
+  CPP ${CMAKE_CODEGEN_BINARY_DIR}/src
+  CPP_OUTPUT  dal_cpp_srcs
+  DUMP_OUTPUT cpp_dump_src)
+
+##############################################################################
+
+
 set(BOOST_LIBS Boost::iostreams ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_LIBRARIES})
 
 daq_codegen( 
@@ -41,6 +59,9 @@ daq_codegen(
 ##############################################################################
 # Dependency sets
 set(HSILIBS_DEPENDENCIES 
+  dunedaqdal::dunedaqdal
+  oksdbinterfaces::oksdbinterfaces
+  okssystem::okssystem
   appfwk::appfwk
   iomanager::iomanager
   ers::ers
@@ -55,7 +76,7 @@ set(HSILIBS_DEPENDENCIES
 )
 
 ##############################################################################
-daq_add_library(HSIEventSender.cpp TimingHSIFrameProcessor.cpp LINK_LIBRARIES ${HSILIBS_DEPENDENCIES})
+daq_add_library(${dal_cpp_srcs} DAL HSIEventSender.cpp TimingHSIFrameProcessor.cpp LINK_LIBRARIES ${HSILIBS_DEPENDENCIES})
 
 ##############################################################################
 daq_add_plugin(HSIDataLinkHandler duneDAQModule LINK_LIBRARIES hsilibs readoutlibs::readoutlibs ${BOOST_LIBS})
