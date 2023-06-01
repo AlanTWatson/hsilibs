@@ -109,20 +109,20 @@
   <attribute name="device" description="String of managed device name" type="string" init-value="" is-not-null="yes"/>
   <attribute name="hardware_state_recovery_enabled" description="control flag for hardware state recovery" type="bool" init-value="true" is-not-null="yes"/>
   <attribute name="timing_session_name" description="Name of managed device timing session" type="string" init-value="" is-not-null="yes"/>
-  <attribute name="clock_frequency" description="HSI firmware clock frequency" type="u8" init-value="" is-not-null="yes"/>
+  <attribute name="clock_frequency" description="HSI firmware clock frequency" type="u32" init-value="" is-not-null="yes"/>
   <attribute name="trigger_rate" description="Trigger rate (in Hz) for the HSIEvent generation" type="double" init-value="" is-not-null="yes"/>
-  <attribute name="address" description="HSI endpoint address" type="u8" init-value="" is-not-null="yes"/>
-  <attribute name="partition" description="SI endpoint partition" type="u8" init-value="" is-not-null="yes"/>
-  <attribute name="rising_edge_mask" description="Rising edge mask for HSI triggering" type="u8" init-value="" is-not-null="yes"/>
-  <attribute name="falling_edge_mask" description="Falling edge mask for HSI triggering" type="u8" init-value="" is-not-null="yes"/>
-  <attribute name="invert_edge_mask" description="Invert edge mask for HSI triggering" type="u8" init-value="" is-not-null="yes"/>
-  <attribute name="data_source" description="Source of data for HSI triggering" type="u8" init-value="" is-not-null="yes"/>
+  <attribute name="address" description="HSI endpoint address" type="u16" init-value="" is-not-null="yes"/>
+  <attribute name="partition" description="SI endpoint partition" type="u16" init-value="" is-not-null="yes"/>
+  <attribute name="rising_edge_mask" description="Rising edge mask for HSI triggering" type="u16" init-value="" is-not-null="yes"/>
+  <attribute name="falling_edge_mask" description="Falling edge mask for HSI triggering" type="u16" init-value="" is-not-null="yes"/>
+  <attribute name="invert_edge_mask" description="Invert edge mask for HSI triggering" type="u16" init-value="" is-not-null="yes"/>
+  <attribute name="data_source" description="Source of data for HSI triggering" type="u16" init-value="" is-not-null="yes"/>
  </class>
 
  <class name="HSIReadoutModule">
   <superclass name="DaqModule"/>
   <attribute name="connections_file" description="device connections file" type="string" init-value="" is-not-null="yes"/>
-  <attribute name="readout_period" description="Hardware device poll period [us]" type="u8" init-value="1000" is-not-null="yes"/>
+  <attribute name="readout_period" description="Hardware device poll period [us]" type="u16" init-value="1000" is-not-null="yes"/>
   <attribute name="hsi_device_name" description="Name of timing master device to be monitored" type="string" init-value="" is-not-null="yes"/>
   <attribute name="uhal_log_level" description="Log level for uhal. Possible values are: fatal, error, warning, notice, info, debug." type="string" init-value="notice" is-not-null="yes"/>
   <attribute name="hsievent_connection_name" description="Connection name to be used to send hsievent to" type="string" init-value="connection_name" is-not-null="yes"/>
