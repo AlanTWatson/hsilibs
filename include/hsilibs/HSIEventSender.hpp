@@ -45,6 +45,7 @@ public:
   HSIEventSender& operator=(HSIEventSender&&) = delete;      ///< HSIEventSender is not move-assignable
 
   void init(const nlohmann::json& obj) override;
+  void init(const dunedaq::dal::DaqModule* conf) override;
 protected:
   // Commands
   virtual void do_configure(const nlohmann::json& obj) = 0;
@@ -57,6 +58,7 @@ protected:
   dunedaq::utilities::WorkerThread m_thread;
 
   // Configuration
+  const dunedaq::dal::HSIEventSenderModule* m_conf;
   std::string m_hsievent_send_connection;
   std::chrono::milliseconds m_queue_timeout;
 

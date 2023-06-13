@@ -51,8 +51,11 @@ public:
   HSIController(HSIController&&) = delete;                 ///< HSIController is not move-constructible
   HSIController& operator=(HSIController&&) = delete;      ///< HSIController is not move-assignable
 
+  void init(const dunedaq::dal::DaqModule* conf) override;
+
 private:
   hsicontroller::ConfParams m_hsi_configuration;
+  const dunedaq::dal::HSIControllerModule* m_conf;
 
   // Commands
   void do_configure(const nlohmann::json& data) override;

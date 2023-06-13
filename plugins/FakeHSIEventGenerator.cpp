@@ -45,6 +45,7 @@ FakeHSIEventGenerator::FakeHSIEventGenerator(const std::string& name)
   , m_enabled_signals(0)
   , m_generated_counter(0)
   , m_last_generated_timestamp(0)
+  , m_conf(0)
 {
   register_command("conf", &FakeHSIEventGenerator::do_configure);
   register_command("start", &FakeHSIEventGenerator::do_start);
@@ -58,6 +59,18 @@ FakeHSIEventGenerator::init(const nlohmann::json& init_data)
 {
   TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Entering init() method";
   HSIEventSender::init(init_data);
+  TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Exiting init() method";
+}
+
+void
+FakeHSIEventGenerator::init(const dunedaq::dal::DaqModule* conf)
+{
+  m_conf = conf->cast<dunedaq::dal::FakeHSIEventGeneratorModule>();
+  TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Entering init() method";
+  // THIS CALL WILL NEED AN OKS VERSION 
+  // (or else we put a hack here to replace it, but inelegant and same call 
+  // is used in HSIReadout)
+  HSIEventSender::init(m_conf);
   TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Exiting init() method";
 }
 
@@ -81,33 +94,57 @@ FakeHSIEventGenerator::do_configure(const nlohmann::json& obj)
 {
   TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Entering do_configure() method";
 
-  auto params = obj.get<fakehsieventgenerator::Conf>();
+  // Use OKS configuration if initialised
+  if (m_conf) {
+    m_hsievent_send_connection = m_conf->get_hsievent_connection_name();
 
-  m_hsievent_send_connection = params.hsievent_connection_name;
+    m_clock_frequency = m_conf->get_clock_frequency();
+    if (m_conf->get_trigger_rate()>0) 
+    {
+      m_trigger_rate.store(m_conf->get_trigger_rate());
+      m_active_trigger_rate.store(m_trigger_rate.load());
+    }
+    else {
+      ers::fatal(InvalidTriggerRateValue(ERS_HERE, m_conf->get_trigger_rate()));
+    }
 
-  m_clock_frequency = params.clock_frequency;
-  if (params.trigger_rate>0)
-  {
-    m_trigger_rate.store(params.trigger_rate);
-    m_active_trigger_rate.store(m_trigger_rate.load());
+    // offset in units of clock ticks, positive offset increases timestamp
+    m_timestamp_offset = m_conf->get_timestamp_offset();
+    m_hsi_device_id = m_conf->get_hsi_device_id();
+    m_signal_emulation_mode = m_conf->get_signal_emulation_mode();
+    m_mean_signal_multiplicity = m_conf->get_mean_signal_multiplicity();
+    m_enabled_signals = m_conf->get_enabled_signals();
   }
-  else
-  {
-    ers::fatal(InvalidTriggerRateValue(ERS_HERE, params.trigger_rate));
-  }
 
+  // Otherwise use json for configuration
+  else {
+    auto params = obj.get<fakehsieventgenerator::Conf>();
+
+    m_hsievent_send_connection = params.hsievent_connection_name;
+
+    m_clock_frequency = params.clock_frequency;
+    if (params.trigger_rate>0)
+    {
+      m_trigger_rate.store(params.trigger_rate);
+      m_active_trigger_rate.store(m_trigger_rate.load());
+    }
+    else
+    {
+      ers::fatal(InvalidTriggerRateValue(ERS_HERE, params.trigger_rate));
+    }
+
+    // offset in units of clock ticks, positive offset increases timestamp
+    m_timestamp_offset = params.timestamp_offset;
+    m_hsi_device_id = params.hsi_device_id;
+    m_signal_emulation_mode = params.signal_emulation_mode;
+    m_mean_signal_multiplicity = params.mean_signal_multiplicity;
+    m_enabled_signals = params.enabled_signals;
+  }
 
   // time between HSI events [us]
   m_event_period.store(1.e6 / m_active_trigger_rate.load());
   TLOG() << get_name() << " Setting trigger rate, event period [us] to: " << m_active_trigger_rate.load() << ", "
          << m_event_period.load();
-
-  // offset in units of clock ticks, positive offset increases timestamp
-  m_timestamp_offset = params.timestamp_offset;
-  m_hsi_device_id = params.hsi_device_id;
-  m_signal_emulation_mode = params.signal_emulation_mode;
-  m_mean_signal_multiplicity = params.mean_signal_multiplicity;
-  m_enabled_signals = params.enabled_signals;
 
   // configure the random distributions
   m_poisson_distribution = std::poisson_distribution<uint64_t>(m_mean_signal_multiplicity); // NOLINT(build/unsigned)

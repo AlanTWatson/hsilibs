@@ -40,6 +40,14 @@ HSIEventSender::init(const nlohmann::json& obj)
 }
 
 void
+HSIEventSender::init(const dunedaq::dal::DaqModule* conf)
+{
+  // 2 of the other plugins (FakeHSIEventGenerator and HSIReadout use this init method)
+  // So either write an OKS version of this next line, or make connection_uid able to be configured by OKS
+  m_raw_hsi_data_sender = get_iom_sender<TIMING_HSI_FRAME_STRUCT>(appfwk::connection_uid(obj, "output"));
+}
+
+void
 HSIEventSender::send_hsi_event(dfmessages::HSIEvent& event, const std::string& location)
 {
   TLOG_DEBUG(3) << get_name() << ": Sending HSIEvent to " << location << ". \n"

@@ -52,6 +52,7 @@ public:
   FakeHSIEventGenerator& operator=(FakeHSIEventGenerator&&) = delete; ///< FakeHSIEventGenerator is not move-assignable
 
   void init(const nlohmann::json& obj) override;
+  void init(const dunedaq::dal::DaqModule* conf) override;
   void get_info(opmonlib::InfoCollector& ci, int level) override;
 
 private:
@@ -70,6 +71,7 @@ private:
   void do_hsievent_work(std::atomic<bool>&) override;
 
   // Configuration
+  const dunedaq::dal::FakeHSIEventGeneratorModule* m_conf;
   std::atomic<daqdataformats::run_number_t> m_run_number;
 
   // Helper class for estimating DAQ time

@@ -80,7 +80,7 @@
 
 <oks-schema>
 
-<info name="" type="" num-of-items="2" oks-format="schema" oks-version="862f2957270" created-by="atw" created-on="M1Mac" creation-time="20230513T105755" last-modified-by="atw" last-modified-on="M1Mac" last-modification-time="20230513T105755"/>
+<info name="" type="" num-of-items="4" oks-format="schema" oks-version="862f2957270" created-by="atw" created-on="M1Mac" creation-time="20230513T105755" last-modified-by="atw" last-modified-on="M1Mac" last-modification-time="20230513T105755"/>
 
 <include>
  <file path="/afs/cern.ch/user/a/atwatson/Listrev-OKS/WorkArea/sourcecode/dunedaqdal/schema/dunedaqdal/dunedaq.schema.xml"/>
@@ -89,7 +89,7 @@
 
  <class name="HSIApplication">
   <superclass name="DaqApplication"/>
-  <attribute name="apps" description="Apps to generate: &quot;s&quot; for single-app ListRev, otherwise specify &quot;g&quot;, &quot;r&quot;, and &quot;v&quot;. E.g.: [&quot;gv&quot;,&quot;r&quot;]" type="string" is-multi-value="yes" init-value="s" is-not-null="yes"/>
+  <attribute name="apps" description="Apps to generate HSI configurations" type="string" is-multi-value="yes" init-value="s" is-not-null="yes"/>
  </class>
 
  <class name="FakeHSIEventGeneratorModule">

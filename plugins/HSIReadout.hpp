@@ -54,11 +54,13 @@ public:
   HSIReadout& operator=(HSIReadout&&) = delete;      ///< HSIReadout is not move-assignable
 
   void init(const nlohmann::json& obj) override;
+  void init(const dunedaq::dal::DaqModule* conf) override;
   void get_info(opmonlib::InfoCollector& ci, int level) override;
 
 private:
   // Commands
   hsireadout::ConfParams m_cfg;
+  const dunedaq::dal::HSIReadoutModule* m_conf;
   void do_configure(const nlohmann::json& obj) override;
   void do_start(const nlohmann::json& obj) override;
   void do_stop(const nlohmann::json& obj) override;

@@ -38,6 +38,7 @@ HSIController::HSIController(const std::string& name)
   : dunedaq::timinglibs::TimingController(name, 9) // 2nd arg: how many hw commands can this module send?
   , m_endpoint_state(0)
   , m_clock_frequency(62.5e6)
+  , m_conf(0)
 {
   register_command("conf", &HSIController::do_configure);
   register_command("start", &HSIController::do_start);
@@ -58,13 +59,32 @@ HSIController::HSIController(const std::string& name)
 }
 
 void
+HSIController::init(const dunedaq::dal::DaqModule* conf)
+{ 
+  // Get OKS config object
+  m_conf = conf->cast<dunedaq::dal::HSIControllerModule>();
+}
+
+void
 HSIController::do_configure(const nlohmann::json& data)
 {
-  m_hsi_configuration = data.get<hsicontroller::ConfParams>();
-  m_timing_device = m_hsi_configuration.device;
+
+  // Use OKS configuration if initialised
+  if (m_conf) 
+  {
+    m_timing_device = m_conf->get_device();
+  }
+  // Otherwise use json
+  else
+  {
+    m_hsi_configuration = data.get<hsicontroller::ConfParams>();
+    m_timing_device = m_hsi_configuration.device;
+  }
   
+  // OKS config of this will be needed!
   TimingController::do_configure(data); // configure hw command connection
 
+  // These can perhaps use m_conf internally (if defined), but leave for the moment
   do_hsi_reset(data);
   do_hsi_endpoint_reset(data);
   do_hsi_configure(data);
