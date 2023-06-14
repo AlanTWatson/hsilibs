@@ -83,7 +83,7 @@
 <info name="" type="" num-of-items="4" oks-format="schema" oks-version="862f2957270" created-by="atw" created-on="M1Mac" creation-time="20230513T105755" last-modified-by="atw" last-modified-on="M1Mac" last-modification-time="20230513T105755"/>
 
 <include>
- <file path="/afs/cern.ch/user/a/atwatson/Listrev-OKS/WorkArea/sourcecode/dunedaqdal/schema/dunedaqdal/dunedaq.schema.xml"/>
+ <file path="schema/dunedaqdal/dunedaq.schema.xml"/>
 </include>
 
 
@@ -126,6 +126,10 @@
   <attribute name="hsi_device_name" description="Name of timing master device to be monitored" type="string" init-value="" is-not-null="yes"/>
   <attribute name="uhal_log_level" description="Log level for uhal. Possible values are: fatal, error, warning, notice, info, debug." type="string" init-value="notice" is-not-null="yes"/>
   <attribute name="hsievent_connection_name" description="Connection name to be used to send hsievent to" type="string" init-value="connection_name" is-not-null="yes"/>
+ </class>
+
+ <class name="HSIDataLinkHandlerModule">
+  <superclass name="DaqModule"/>
  </class>
 
 </oks-schema>
