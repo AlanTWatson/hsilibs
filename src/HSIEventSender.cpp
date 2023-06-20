@@ -42,9 +42,14 @@ HSIEventSender::init(const nlohmann::json& obj)
 void
 HSIEventSender::init(const dunedaq::dal::DaqModule* conf)
 {
-  // 2 of the other plugins (FakeHSIEventGenerator and HSIReadout use this init method)
-  // So either write an OKS version of this next line, or make connection_uid able to be configured by OKS
-  m_raw_hsi_data_sender = get_iom_sender<TIMING_HSI_FRAME_STRUCT>(appfwk::connection_uid(obj, "output"));
+
+  // If we write an OKS version of connection_uid we can just uncomment this here
+  //m_raw_hsi_data_sender = get_iom_sender<TIMING_HSI_FRAME_STRUCT>(appfwk::connection_uid(obj, "output"));
+
+  // But for this plugin, where there's just a single output queue, we can just get the UID directly
+  auto output = conf->get_outputs();
+  m_raw_hsi_data_sender = get_iom_sender<TIMING_HSI_FRAME_STRUCT>(output->UID());  
+
 }
 
 void
