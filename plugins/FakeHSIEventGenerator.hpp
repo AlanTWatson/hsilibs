@@ -15,6 +15,8 @@
 #include "hsilibs/fakehsieventgeneratorinfo/InfoNljs.hpp"
 #include "hsilibs/fakehsieventgeneratorinfo/InfoStructs.hpp"
 
+#include "hsilibs/FakeHSIEventGeneratorModule.hpp"
+
 #include "appfwk/DAQModule.hpp"
 #include "daqdataformats/Types.hpp"
 #include "dfmessages/TimeSync.hpp"

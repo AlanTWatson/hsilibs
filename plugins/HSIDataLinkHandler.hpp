@@ -13,6 +13,8 @@
 #include "daqdataformats/Types.hpp"
 #include "readoutlibs/concepts/ReadoutConcept.hpp"
 
+#include "hsilibs/HSIDataLinkHandlerModule.hpp"
+
 #include <chrono>
 #include <memory>
 #include <string>

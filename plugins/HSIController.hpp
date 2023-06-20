@@ -17,6 +17,8 @@
 #include "hsilibs/hsicontrollerinfo/InfoNljs.hpp"
 #include "hsilibs/hsicontrollerinfo/InfoStructs.hpp"
 
+#include "hsilibs/HSIControllerModule.hpp"
+
 #include "timinglibs/timingcmd/Nljs.hpp"
 #include "timinglibs/timingcmd/Structs.hpp"
 #include "timinglibs/TimingController.hpp"

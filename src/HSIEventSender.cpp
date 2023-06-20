@@ -9,6 +9,8 @@
 
 #include "hsilibs/HSIEventSender.hpp"
 
+#include "dunedaqdal/Connection.hpp"
+
 #include "appfwk/DAQModuleHelper.hpp"
 #include "appfwk/app/Nljs.hpp"
 #include "iomanager/IOManager.hpp"
@@ -47,9 +49,11 @@ HSIEventSender::init(const dunedaq::dal::DaqModule* conf)
   //m_raw_hsi_data_sender = get_iom_sender<TIMING_HSI_FRAME_STRUCT>(appfwk::connection_uid(obj, "output"));
 
   // But for this plugin, where there's just a single output queue, we can just get the UID directly
-  auto output = conf->get_outputs();
-  m_raw_hsi_data_sender = get_iom_sender<TIMING_HSI_FRAME_STRUCT>(output->UID());  
-
+  m_raw_hsi_data_sender = nullptr;
+  for (const auto output: conf->get_outputs()) {
+    if (m_raw_hsi_data_sender == nullptr) 
+       m_raw_hsi_data_sender = get_iom_sender<TIMING_HSI_FRAME_STRUCT>(output->UID());  
+  }
 }
 
 void

@@ -58,7 +58,6 @@ protected:
   dunedaq::utilities::WorkerThread m_thread;
 
   // Configuration
-  const dunedaq::dal::HSIEventSenderModule* m_conf;
   std::string m_hsievent_send_connection;
   std::chrono::milliseconds m_queue_timeout;
 

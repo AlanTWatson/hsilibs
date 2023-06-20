@@ -13,6 +13,8 @@
 #include "hsilibs/hsireadoutinfo/InfoNljs.hpp"
 #include "hsilibs/hsireadoutinfo/InfoStructs.hpp"
 
+#include "hsilibs/HSIReadoutModule.hpp"
+
 #include "appfwk/DAQModule.hpp"
 #include "dfmessages/HSIEvent.hpp"
 #include "timing/HSINode.hpp"
