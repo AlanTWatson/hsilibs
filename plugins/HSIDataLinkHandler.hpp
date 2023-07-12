@@ -13,7 +13,7 @@
 #include "daqdataformats/Types.hpp"
 #include "readoutlibs/concepts/ReadoutConcept.hpp"
 
-#include "hsilibs/HSIDataLinkHandlerModule.hpp"
+//#include "hsilibs/HSIDataLinkHandlerModule.hpp"
 
 #include <chrono>
 #include <memory>
@@ -52,7 +52,8 @@ private:
 
   // Configuration
   bool m_configured;
-  const dunedaq::dal::HSIDataLinkHandlerModule* m_conf;
+  //const dunedaq::dal::HSIDataLinkHandlerModule* m_conf;
+  const dunedaq::dal::DaqModule* m_conf;
   daqdataformats::run_number_t m_run_number;
 
   // Internal

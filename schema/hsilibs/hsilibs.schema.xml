@@ -128,8 +128,4 @@
   <attribute name="hsievent_connection_name" description="Connection name to be used to send hsievent to" type="string" init-value="connection_name" is-not-null="yes"/>
  </class>
 
- <class name="HSIDataLinkHandlerModule">
-  <superclass name="DaqModule"/>
- </class>
-
 </oks-schema>
