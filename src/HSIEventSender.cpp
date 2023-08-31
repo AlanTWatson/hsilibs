@@ -9,6 +9,8 @@
 
 #include "hsilibs/HSIEventSender.hpp"
 
+//#include "coredal/Connection.hpp"
+
 #include "appfwk/DAQModuleHelper.hpp"
 #include "appfwk/app/Nljs.hpp"
 #include "iomanager/IOManager.hpp"
@@ -39,6 +41,26 @@ HSIEventSender::init(const nlohmann::json& init_data)
   m_hsievent_send_connection = appfwk::connection_uid(init_data,"hsievents");
   m_hsievent_sender = get_iom_sender<dfmessages::HSIEvent>(m_hsievent_send_connection);
 }
+
+void
+HSIEventSender::init(const dunedaq::coredal::DaqModule* conf)
+{
+  // If we write an OKS version of connection_uid we can just uncomment this here
+  //m_hsievent_send_connection = appfwk::connection_uid(init_data,"hsievents");
+  
+  // But for this plugin, where there's just a single output queue, we can just get the UID directly
+  /*
+  for (const auto output: conf->get_outputs()) {
+    m_hsievent_send_connection = output->UID();
+  }
+  */
+
+  // Test the DAL version of connection_uid
+  m_hsievent_send_connection = appfwk::connection_uid(conf,"hsievents");
+
+  m_hsievent_sender = get_iom_sender<dfmessages::HSIEvent>(m_hsievent_send_connection);
+}
+
 
 void
 HSIEventSender::send_hsi_event(dfmessages::HSIEvent& event)

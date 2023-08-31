@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
-project(hsilibs VERSION 2.2.0)
+project(hsilibs VERSION 2.1.0)
+
+include(CMakePrintHelpers)
 
 find_package(daq-cmake REQUIRED)
 
@@ -22,8 +24,20 @@ find_package(pugixml REQUIRED)
 find_package(iomanager REQUIRED)
 find_package(daqdataformats REQUIRED)
 find_package(detdataformats REQUIRED)
-find_package(utilities REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework iostreams REQUIRED)
+
+##############################################################################
+# OKS stuff
+find_package(okssystem REQUIRED)
+find_package(genconfig REQUIRED)
+find_package(oksdbinterfaces REQUIRED)
+find_package(coredal REQUIRED)
+
+daq_oks_codegen(hsilibs.schema.xml
+  NAMESPACE dunedaq::coredal
+  DEP_PKGS coredal)
+
+##############################################################################
 
 set(BOOST_LIBS Boost::iostreams ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_LIBRARIES})
 
@@ -42,6 +56,9 @@ daq_codegen(
 ##############################################################################
 # Dependency sets
 set(HSILIBS_DEPENDENCIES 
+  coredal::coredal
+  oksdbinterfaces::oksdbinterfaces
+  okssystem::okssystem
   appfwk::appfwk
   iomanager::iomanager
   ers::ers
@@ -56,12 +73,13 @@ set(HSILIBS_DEPENDENCIES
 )
 
 ##############################################################################
-daq_add_library(HSIEventSender.cpp HSIFrameProcessor.cpp LINK_LIBRARIES ${HSILIBS_DEPENDENCIES})
+daq_add_library(${dal_cpp_srcs} HSIEventSender.cpp HSIFrameProcessor.cpp LINK_LIBRARIES ${HSILIBS_DEPENDENCIES})
 
 ##############################################################################
 daq_add_plugin(HSIDataLinkHandler duneDAQModule LINK_LIBRARIES hsilibs readoutlibs::readoutlibs ${BOOST_LIBS})
-daq_add_plugin(FakeHSIEventGenerator duneDAQModule LINK_LIBRARIES hsilibs timing::timing utilities::utilities)
-daq_add_plugin(HSIReadout duneDAQModule LINK_LIBRARIES timing::timing uhal::uhal pugixml::pugixml hsilibs)
+### daq_add_plugin(FakeHSIEventGenerator duneDAQModule LINK_LIBRARIES hsilibs timinglibs::timinglibs timing::timing)
+daq_add_plugin(FakeHSIEventGenerator duneDAQModule LINK_LIBRARIES appfwk::appfwk hsilibs hsilibs_oks coremanager timinglibs::timinglibs timing::timing)
+daq_add_plugin(HSIReadout duneDAQModule LINK_LIBRARIES timing::timing timinglibs::timinglibs uhal::uhal pugixml::pugixml hsilibs)
 daq_add_plugin(HSIController duneDAQModule LINK_LIBRARIES hsilibs timing::timing timinglibs::timinglibs)
 
 ##############################################################################

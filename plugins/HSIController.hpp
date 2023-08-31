@@ -17,6 +17,8 @@
 #include "hsilibs/hsicontrollerinfo/InfoNljs.hpp"
 #include "hsilibs/hsicontrollerinfo/InfoStructs.hpp"
 
+#include "hsilibs/HSIControllerModule.hpp"
+
 #include "timinglibs/timingcmd/Nljs.hpp"
 #include "timinglibs/timingcmd/Structs.hpp"
 #include "timinglibs/TimingController.hpp"
@@ -51,8 +53,11 @@ public:
   HSIController(HSIController&&) = delete;                 ///< HSIController is not move-constructible
   HSIController& operator=(HSIController&&) = delete;      ///< HSIController is not move-assignable
 
+  void init(const dunedaq::coredal::DaqModule* conf) override;
+
 private:
   hsicontroller::ConfParams m_hsi_configuration;
+  const dunedaq::coredal::HSIControllerModule* m_conf;
 
   // Commands
   void do_configure(const nlohmann::json& data) override;

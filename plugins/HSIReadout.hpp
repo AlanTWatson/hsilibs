@@ -13,6 +13,8 @@
 #include "hsilibs/hsireadoutinfo/InfoNljs.hpp"
 #include "hsilibs/hsireadoutinfo/InfoStructs.hpp"
 
+#include "hsilibs/HSIReadoutModule.hpp"
+
 #include "appfwk/DAQModule.hpp"
 #include "dfmessages/HSIEvent.hpp"
 #include "timing/HSINode.hpp"
@@ -54,11 +56,11 @@ public:
   HSIReadout& operator=(HSIReadout&&) = delete;      ///< HSIReadout is not move-assignable
 
   void init(const nlohmann::json& obj) override;
+  void init(const dunedaq::coredal::DaqModule* conf) override;
   void get_info(opmonlib::InfoCollector& ci, int level) override;
 
 private:
   // Commands
-  hsireadout::ConfParams m_cfg;
   void do_configure(const nlohmann::json& obj) override;
   void do_start(const nlohmann::json& obj) override;
   void do_stop(const nlohmann::json& obj) override;
@@ -70,6 +72,8 @@ private:
   dunedaq::utilities::WorkerThread m_thread;
 
   // Configuration
+  hsireadout::ConfParams m_cfg;
+  const dunedaq::coredal::HSIReadoutModule* m_conf;
   std::string m_hsi_device_name;
   uint m_readout_period; // NOLINT(build/unsigned)
 

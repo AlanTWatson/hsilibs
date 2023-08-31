@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="ASCII"?>
+
+<!-- oks-schema version 2.2 -->
+
+
+<!DOCTYPE oks-schema [
+  <!ELEMENT oks-schema (info, (include)?, (comments)?, (class)+)>
+  <!ELEMENT info EMPTY>
+  <!ATTLIST info
+      name CDATA #IMPLIED
+      type CDATA #IMPLIED
+      num-of-items CDATA #REQUIRED
+      oks-format CDATA #FIXED "schema"
+      oks-version CDATA #REQUIRED
+      created-by CDATA #IMPLIED
+      created-on CDATA #IMPLIED
+      creation-time CDATA #IMPLIED
+      last-modified-by CDATA #IMPLIED
+      last-modified-on CDATA #IMPLIED
+      last-modification-time CDATA #IMPLIED
+  >
+  <!ELEMENT include (file)+>
+  <!ELEMENT file EMPTY>
+  <!ATTLIST file
+      path CDATA #REQUIRED
+  >
+  <!ELEMENT comments (comment)+>
+  <!ELEMENT comment EMPTY>
+  <!ATTLIST comment
+      creation-time CDATA #REQUIRED
+      created-by CDATA #REQUIRED
+      created-on CDATA #REQUIRED
+      author CDATA #REQUIRED
+      text CDATA #REQUIRED
+  >
+  <!ELEMENT class (superclass | attribute | relationship | method)*>
+  <!ATTLIST class
+      name CDATA #REQUIRED
+      description CDATA ""
+      is-abstract (yes|no) "no"
+  >
+  <!ELEMENT superclass EMPTY>
+  <!ATTLIST superclass name CDATA #REQUIRED>
+  <!ELEMENT attribute EMPTY>
+  <!ATTLIST attribute
+      name CDATA #REQUIRED
+      description CDATA ""
+      type (bool|s8|u8|s16|u16|s32|u32|s64|u64|float|double|date|time|string|uid|enum|class) #REQUIRED
+      range CDATA ""
+      format (dec|hex|oct) "dec"
+      is-multi-value (yes|no) "no"
+      init-value CDATA ""
+      is-not-null (yes|no) "no"
+      ordered (yes|no) "no"
+  >
+  <!ELEMENT relationship EMPTY>
+  <!ATTLIST relationship
+      name CDATA #REQUIRED
+      description CDATA ""
+      class-type CDATA #REQUIRED
+      low-cc (zero|one) #REQUIRED
+      high-cc (one|many) #REQUIRED
+      is-composite (yes|no) #REQUIRED
+      is-exclusive (yes|no) #REQUIRED
+      is-dependent (yes|no) #REQUIRED
+      ordered (yes|no) "no"
+  >
+  <!ELEMENT method (method-implementation*)>
+  <!ATTLIST method
+      name CDATA #REQUIRED
+      description CDATA ""
+  >
+  <!ELEMENT method-implementation EMPTY>
+  <!ATTLIST method-implementation
+      language CDATA #REQUIRED
+      prototype CDATA #REQUIRED
+      body CDATA ""
+  >
+]>
+
+<oks-schema>
+
+<info name="" type="" num-of-items="4" oks-format="schema" oks-version="862f2957270" created-by="atw" created-on="M1Mac" creation-time="20230513T105755" last-modified-by="atw" last-modified-on="M1Mac" last-modification-time="20230513T105755"/>
+
+<include>
+ <file path="schema/coredal/dunedaq.schema.xml"/>
+</include>
+
+
+ <class name="HSIApplication">
+  <superclass name="DaqApplication"/>
+  <attribute name="apps" description="Apps to generate HSI configurations" type="string" is-multi-value="yes" init-value="s" is-not-null="yes"/>
+ </class>
+
+ <class name="FakeHSIEventGeneratorModule">
+  <superclass name="DaqModule"/>
+  <attribute name="clock_frequency" description="Assumed clock frequency in Hz (for current-timestamp estimation)" type="u64" init-value="62500000" is-not-null="yes"/>
+  <attribute name="timestamp_offset" description="Offset for HSIEvent timestamps in units of clock ticks. Positive offset increases timestamp estimate." type="s64" init-value="0" is-not-null="yes"/>
+  <attribute name="trigger_rate" description="Trigger rate (in Hz) for the HSIEvent generation" type="double" init-value="1" is-not-null="yes"/>
+  <attribute name="hsi_device_id" description="HSI device ID for emulated HSIEvent messages" type="u32" init-value="1" is-not-null="yes"/>
+  <attribute name="mean_signal_multiplicity" description="Mean number of edges expected per signal. Used when signal emulation mode is 1" type="u32" init-value="1" is-not-null="yes"/>
+  <attribute name="enabled_signals" description="Which signals or bit of the 32 bit signal bit map are enabled, i.e. could produce an emulated signal" type="u32" init-value="0" is-not-null="yes"/>
+  <attribute name="signal_emulation_mode" description="Signal bit map emulation mode. 0: enabled signals always on; 1: enabled signals are emulated (independently) on according to a Poisson with mean mean_signal_multiplicity; signal map generated with uniform distr. enabled signals onl" type="u32" init-value="0" is-not-null="yes"/>
+  <attribute name="hsievent_connection_name" description="Connection name to be used to send hsievent to" type="string" init-value="" is-not-null="yes"/>
+ </class>
+
+ <class name="HSIControllerModule">
+  <superclass name="DaqModule"/>
+  <attribute name="device" description="String of managed device name" type="string" init-value="" is-not-null="yes"/>
+  <attribute name="hardware_state_recovery_enabled" description="control flag for hardware state recovery" type="bool" init-value="true" is-not-null="yes"/>
+  <attribute name="timing_session_name" description="Name of managed device timing session" type="string" init-value="" is-not-null="yes"/>
+  <attribute name="clock_frequency" description="HSI firmware clock frequency" type="u32" init-value="" is-not-null="yes"/>
+  <attribute name="trigger_rate" description="Trigger rate (in Hz) for the HSIEvent generation" type="double" init-value="" is-not-null="yes"/>
+  <attribute name="address" description="HSI endpoint address" type="u16" init-value="" is-not-null="yes"/>
+  <attribute name="partition" description="SI endpoint partition" type="u16" init-value="" is-not-null="yes"/>
+  <attribute name="rising_edge_mask" description="Rising edge mask for HSI triggering" type="u16" init-value="" is-not-null="yes"/>
+  <attribute name="falling_edge_mask" description="Falling edge mask for HSI triggering" type="u16" init-value="" is-not-null="yes"/>
+  <attribute name="invert_edge_mask" description="Invert edge mask for HSI triggering" type="u16" init-value="" is-not-null="yes"/>
+  <attribute name="data_source" description="Source of data for HSI triggering" type="u16" init-value="" is-not-null="yes"/>
+ </class>
+
+ <class name="HSIReadoutModule">
+  <superclass name="DaqModule"/>
+  <attribute name="connections_file" description="device connections file" type="string" init-value="" is-not-null="yes"/>
+  <attribute name="readout_period" description="Hardware device poll period [us]" type="u16" init-value="1000" is-not-null="yes"/>
+  <attribute name="hsi_device_name" description="Name of timing master device to be monitored" type="string" init-value="" is-not-null="yes"/>
+  <attribute name="uhal_log_level" description="Log level for uhal. Possible values are: fatal, error, warning, notice, info, debug." type="string" init-value="notice" is-not-null="yes"/>
+  <attribute name="hsievent_connection_name" description="Connection name to be used to send hsievent to" type="string" init-value="connection_name" is-not-null="yes"/>
+ </class>
+
+</oks-schema>

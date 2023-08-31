@@ -45,6 +45,7 @@ public:
   HSIEventSender& operator=(HSIEventSender&&) = delete;      ///< HSIEventSender is not move-assignable
 
   void init(const nlohmann::json& init_data) override;
+  void init(const dunedaq::coredal::DaqModule* conf) override;
 protected:
   // Commands
   virtual void do_configure(const nlohmann::json& obj) = 0;

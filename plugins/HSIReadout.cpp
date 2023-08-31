@@ -11,6 +11,7 @@
 
 #include "hsilibs/hsireadout/Nljs.hpp"
 
+#include "timinglibs/TimingIssues.hpp"
 #include "timing/TimingIssues.hpp"
 #include "timing/HSIDesignInterface.hpp"
 
@@ -53,7 +54,7 @@ HSIReadout::HSIReadout(const std::string& name)
   , m_hsi_device(nullptr)
   , m_readout_counter(0)
   , m_last_readout_timestamp(0)
-
+  , m_conf(0)
 {
   register_command("conf", &HSIReadout::do_configure);
   register_command("start", &HSIReadout::do_start);
@@ -71,33 +72,80 @@ HSIReadout::init(const nlohmann::json& init_data)
 }
 
 void
+HSIReadout::init(const dunedaq::coredal::DaqModule* conf)
+{
+  TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Entering init() method";
+  HSIEventSender::init(conf);
+  m_raw_hsi_data_sender = get_iom_sender<HSI_FRAME_STRUCT>(appfwk::connection_uid(conf, "output"));
+  TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Exiting init() method";
+}
+
+void
 HSIReadout::do_configure(const nlohmann::json& obj)
 {
   TLOG_DEBUG(TLVL_ENTER_EXIT_METHODS) << get_name() << ": Entering do_configure() method";
 
-  m_cfg = obj.get<hsireadout::ConfParams>();
+  // Use OKS configuration if initialised
+  if (m_conf)
+  { 
+    //m_hsievent_send_connection = m_conf->get_hsievent_connection_name();
+    m_connections_file = m_conf->get_connections_file();
+    m_readout_period = m_conf->get_readout_period();
+    m_hsi_device_name = m_conf->get_hsi_device_name();
 
-  m_connections_file = m_cfg.connections_file;
-  m_readout_period = m_cfg.readout_period;
+    TLOG_DEBUG(0) << get_name() << "conf: con. file before env var expansion: " << m_connections_file;
+    resolve_environment_variables(m_connections_file);
+    TLOG_DEBUG(0) << get_name() << "conf: con. file after env var expansion:  " << m_connections_file;
+    
+    std::string log_level = m_conf->get_uhal_log_level();
+    if (!log_level.compare("debug")) {
+      uhal::setLogLevelTo(uhal::Debug());
+    } else if (!log_level.compare("info")) {
+      uhal::setLogLevelTo(uhal::Info());
+    } else if (!log_level.compare("notice")) {
+      uhal::setLogLevelTo(uhal::Notice());
+    } else if (!log_level.compare("warning")) {
+      uhal::setLogLevelTo(uhal::Warning()); 
+    } else if (!log_level.compare("error")) {
+      uhal::setLogLevelTo(uhal::Error());
+    } else if (!log_level.compare("fatal")) {
+      uhal::setLogLevelTo(uhal::Fatal());
+    } else {
+      throw InvalidUHALLogLevel(ERS_HERE, log_level);
+    }
+  }
+  // Otherwise use json
+  else {
+    m_cfg = obj.get<hsireadout::ConfParams>();
 
-  TLOG_DEBUG(0) << get_name() << "conf: con. file before env var expansion: " << m_connections_file;
-  resolve_environment_variables(m_connections_file);
-  TLOG_DEBUG(0) << get_name() << "conf: con. file after env var expansion:  " << m_connections_file;
+    m_connections_file = m_cfg.connections_file;
+    m_readout_period = m_cfg.readout_period;
 
-  if (!m_cfg.uhal_log_level.compare("debug")) {
-    uhal::setLogLevelTo(uhal::Debug());
-  } else if (!m_cfg.uhal_log_level.compare("info")) {
-    uhal::setLogLevelTo(uhal::Info());
-  } else if (!m_cfg.uhal_log_level.compare("notice")) {
-    uhal::setLogLevelTo(uhal::Notice());
-  } else if (!m_cfg.uhal_log_level.compare("warning")) {
-    uhal::setLogLevelTo(uhal::Warning());
-  } else if (!m_cfg.uhal_log_level.compare("error")) {
-    uhal::setLogLevelTo(uhal::Error());
-  } else if (!m_cfg.uhal_log_level.compare("fatal")) {
-    uhal::setLogLevelTo(uhal::Fatal());
-  } else {
-    throw InvalidUHALLogLevel(ERS_HERE, m_cfg.uhal_log_level);
+    TLOG_DEBUG(0) << get_name() << "conf: con. file before env var expansion: " << m_connections_file;
+    resolve_environment_variables(m_connections_file);
+    TLOG_DEBUG(0) << get_name() << "conf: con. file after env var expansion:  " << m_connections_file;
+
+    if (!m_cfg.uhal_log_level.compare("debug")) {
+      uhal::setLogLevelTo(uhal::Debug());
+    } else if (!m_cfg.uhal_log_level.compare("info")) {
+      uhal::setLogLevelTo(uhal::Info());
+    } else if (!m_cfg.uhal_log_level.compare("notice")) {
+      uhal::setLogLevelTo(uhal::Notice());
+    } else if (!m_cfg.uhal_log_level.compare("warning")) {
+      uhal::setLogLevelTo(uhal::Warning());
+    } else if (!m_cfg.uhal_log_level.compare("error")) {
+      uhal::setLogLevelTo(uhal::Error());
+    } else if (!m_cfg.uhal_log_level.compare("fatal")) {
+      uhal::setLogLevelTo(uhal::Fatal());
+    } else {
+      throw InvalidUHALLogLevel(ERS_HERE, m_cfg.uhal_log_level);
+    }
+
+    if (m_cfg.hsi_device_name.empty())
+    {
+      throw UHALDeviceNameIssue(ERS_HERE, "Device name for HSIReadout should not be empty");
+    }
+    m_hsi_device_name = m_cfg.hsi_device_name;
   }
 
   try {
@@ -107,11 +155,6 @@ HSIReadout::do_configure(const nlohmann::json& obj)
     message << m_connections_file << " not found. Has TIMING_SHARE been set?";
     throw UHALConnectionsFileIssue(ERS_HERE, message.str(), excpt);
   }
-  if (m_cfg.hsi_device_name.empty())
-  {
-    throw UHALDeviceNameIssue(ERS_HERE, "Device name for HSIReadout should not be empty");
-  }
-  m_hsi_device_name = m_cfg.hsi_device_name;
 
   try {
     m_hsi_device = std::make_unique<uhal::HwInterface>(m_connection_manager->getDevice(m_hsi_device_name));

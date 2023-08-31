@@ -38,6 +38,7 @@ HSIController::HSIController(const std::string& name)
   : dunedaq::timinglibs::TimingController(name, 9) // 2nd arg: how many hw commands can this module send?
   , m_endpoint_state(0)
   , m_clock_frequency(62.5e6)
+  , m_conf(0)
 {
   register_command("conf", &HSIController::do_configure);
   register_command("start", &HSIController::do_start);
@@ -57,18 +58,37 @@ HSIController::HSIController(const std::string& name)
   register_command("hsi_print_status", &HSIController::do_hsi_print_status);
 }
 
+
+void
+HSIController::init(const dunedaq::coredal::DaqModule* conf)
+{
+  // Get OKS config object
+  m_conf = conf->cast<dunedaq::coredal::HSIControllerModule>();
+}
+
 void
 HSIController::do_configure(const nlohmann::json& data)
 {
-  m_hsi_configuration = data.get<hsicontroller::ConfParams>();
-  m_hardware_state_recovery_enabled = m_hsi_configuration.hardware_state_recovery_enabled;
-  m_timing_device = m_hsi_configuration.device;
-  m_timing_session_name = m_hsi_configuration.timing_session_name;
-
+  // Use OKS if initialised
+  if (m_conf)
+  {
+    m_hardware_state_recovery_enabled = m_conf->get_hardware_state_recovery_enabled();
+    m_timing_device = m_conf->get_device();
+    m_timing_session_name = m_conf->get_timing_session_name();
+  }
+  
+  // Use json otherwise
+  else {
+    m_hsi_configuration = data.get<hsicontroller::ConfParams>();
+    m_hardware_state_recovery_enabled = m_hsi_configuration.hardware_state_recovery_enabled;
+    m_timing_device = m_hsi_configuration.device;
+    m_timing_session_name = m_hsi_configuration.timing_session_name;
+  }
+  
+  // Will need DAL version of these (and of do_start)
   TimingController::do_configure(data); // configure hw command connection
 
   configure_hardware_or_recover_state<timinglibs::TimingEndpointNotReady>(data, "HSI endpoint", m_endpoint_state.load());
-
   TLOG() << get_name() << " conf done for hsi endpoint, device: " << m_timing_device;
 }
 

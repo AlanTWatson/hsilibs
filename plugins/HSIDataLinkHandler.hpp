@@ -37,6 +37,7 @@ public:
   HSIDataLinkHandler& operator=(HSIDataLinkHandler&&) = delete;      ///< HSIDataLinkHandler is not move-assignable
 
   void init(const data_t& args) override;
+  void init(const dunedaq::coredal::DaqModule* conf) override;
   void get_info(opmonlib::InfoCollector& ci, int level) override;
 
 private:
@@ -49,6 +50,7 @@ private:
 
   // Configuration
   bool m_configured;
+  const dunedaq::coredal::DaqModule* m_conf;
   daqdataformats::run_number_t m_run_number;
 
   // Internal
